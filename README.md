@@ -205,10 +205,6 @@ After clicking "Add", it make take a moment before the dots appear on your map. 
 Explore the map, and note that these are generally just the trees along public roads that are maintained by the city.  Trees in private backyards are not usually included.
 
 
-## Elevation
-
-
-
 ## Exporting your map to an image file
 
 To export the current map view to an image file:
@@ -243,6 +239,80 @@ Do **NOT** export to DXF using any of these CRS, or you will see distortions and
 * EPSG:3857 = WGS 84 / Pseudo-Mercator -- also called "Web Mercator", uses false "meters" (only true at equator)
 
 If you have data that extends beyond your area of interest, and don't want to export it all to DXF, try checking the "Export features intersecting the current map extent".  (You may need to cancel if you need to adjust the map extent, and then open the export dialog again after zooming into the area you want to export.)
+
+
+## Elevation raster data
+
+Various scales of elevation data are available for different parts of the world.  For much of the globe, the best available is 30-meter SRTM data, collected as part of the Shuttle Radar Topography Mission in 2000.  Most of the United States is covered by the National Elevation Dataset (NED) with 10-meter pixels.  Some places have higher resolution data available from a local lidar survey.  For Buffalo, there was a 2008 lidar survey which was used to generated a high-resolution elevation raster with 2-meter pixels.  Due to the relatively large size of these elevation datasets, the data has already been downloaded and clipped to the city of Buffalo.
+
+* Open the `elevation` folder in your Windows file explorer or Mac finder
+* Drag the "elevation_10m_buffalo.tif" and "elevation_2m_buffalo.tif" files onto your project
+
+By default, raster data is displayed with a gray gradient, with higher values brighter.  We can change the style to bring out more details in the data.
+
+* In the Layer Styling panel, change from "Singleband gray" to "Singleband pseudocolor"
+* Try changing the color ramp to "Turbo" (click the small down-arrow to the right of the color bar)
+
+It will be easier to adjust a small number of colorrs.  If you have more than 5-6 colors listed, try setting the Mode to "Quantile" and adjust the number of Classes to 6.
+
+Notice the values assigned to each color.  You will probably want to adjust those values to better represent the lake water level, which is somewhere around 176-177.  Try the following, and notice how the map changes at each step:
+
+* Double-click the value for light blue and set it to 176.4
+* Set the green value to 176.5 and make it a dark green
+
+Zoom into an area along the water.  With the settings above, any value 176.4 or less will be bluish, and anything just 176.5 and above that (land) will be green.  Notice that the water is not exactly flat, due to nature of the way the data was collected and created, with waves in the water adding noise to the elevation values.
+
+## Value Tool plugin
+
+Although we could use the "Identify" tool to click pixels and see their values, the "Value Tool" plugin will allow you to instantly show the values from raster layers without even having to click.
+
+* Plugins > Manage and Install Plugins...
+* Search all plugins for "value tool" and install it
+
+The Value Tool will appear on your toolbar as a green circle with white "i".
+
+* Click the Value Tool button to open the panel
+* Check the box to enable the tool
+* Move your cursor across the map to view the raster values
+
+Try checking the elevations for various parts of the map.  Note that the elevations are in feet (which could be verified by reading the metadata file.)
+
+
+## Elevation hillshade
+
+Even though we can see the differences between the highest and lowest parts of the country, the area along the coast looks rather flat and devoid of detail.  Let's use a hillshade to made it look more 3-dimensional.
+
+* In the Layers Panel, right-click the "elevation_2m_buffalo" layer > Duplicate
+* Right-click "elevation_2m_buffalo copy" > Rename to "hillshade"
+* Drag the "hillshade" layer name just above "elevation_2m_buffalo" and check the box to display the hillshade layer
+* Open the styling panel be sure that you are styling the "hillshade" layer
+* Change "Singleband pseudocolor" to "Hillshade"
+* Set the blending mode to "multiply" (which will let us also see the colorized version underneath)
+
+* Try turning the dial to adjust the angle of the "sun"
+
+We can exaggerate the hillshade effect by increasing the Z Factor, which is usually the ratio between the vertical units (meters) and horizontal units (also meters).
+
+* Set Z Factor to 3
+
+Also notice that if you zoom in too far, you see individual pixel edges.  To avoid this effect:
+
+* Set the resampling "Zoomed in" to "Bilinear" which will smooth out the pixels
+
+
+## Generating contour lines
+
+There is a "contours" display style for rasters, but is just a visual effect.  If we want to export 3D contour lines for use in a program like Rhino or AutoCAD, we will need to create a vector contour layer.
+
+* Open the processing toolbox (gear icon, or in the Processing menu)
+* Search for "contour" and open the "Contour" tool under GDAL > Raster extraction
+* Set the following parameters:
+  * Input layer = "elevation_2m_buffalo"
+  * Interval between contour lines = 2 (this value, which is meters in this case, should usually not be much less than the pixel size)
+  * Check the box to "Produce 3D vector" (if you don't see it, expand the Advanced Parameters section)
+* Keep the other options and click "Run"
+
+To export the 3D contours to DXF, right-click the layer > Export > Save features as ... AutoCAD DXF or else export your whole project to DXF.
 
 
 ## Citing your Data Sources
